@@ -73,11 +73,11 @@ namespace Palmtree.Math.CodeGen
 
         static void Generate(TextWriter writer)
         {
-            writer.WriteLine("");
-            GenerateADD_SET(writer, 32);
-            writer.WriteLine("");
-            GenerateADD_SET(writer, 16);
-            writer.WriteLine("");
+            //writer.WriteLine("");
+            //GenerateADD_SET(writer, 32);
+            //writer.WriteLine("");
+            //GenerateADD_SET(writer, 16);
+            //writer.WriteLine("");
             GenerateADD_SET(writer, 8);
             writer.WriteLine("");
         }
@@ -99,8 +99,8 @@ namespace Palmtree.Math.CodeGen
             for (int count = 0; count < max_count; ++count)
                 writer.WriteLine(string.Format("    {1}(c, xp[{0}], yp[{0}], &zp[{0}]);", count, op == "adc" ? "_ADD_UNIT" : "_ADDX_UNIT"));
             writer.WriteLine("#elif defined(__GNUC__)");
-            GenerateASM_ADD(writer, max_count, op + "l", "movl", "ecx");
             writer.WriteLine("#ifdef _M_IX86");
+            GenerateASM_ADD(writer, max_count, op + "l", "movl", "ecx");
             writer.WriteLine("#elif defined(_M_IX64)");
             GenerateASM_ADD(writer, max_count, op + "q", "movq", "rcx");
             writer.WriteLine("#else");
@@ -116,12 +116,12 @@ namespace Palmtree.Math.CodeGen
         private static void GenerateASM_ADD(TextWriter writer, int max_count, string op_add, string op_mov, string temp_reg)
         {
             writer.WriteLine("    __asm__ volatile (");
-            writer.WriteLine("        \"addb\\t$-1, %0\\t\\n\"");
+            writer.WriteLine("        \"addb\\t$-1, %0\\n\\t\"");
             for (int count = 0; count < max_count; ++count)
             {
-                writer.WriteLine(string.Format("        \"{0}\\t%{1}, %%{2}\\t\\n\"", op_mov, 33 + count * 2, temp_reg));
-                writer.WriteLine(string.Format("        \"{0}\\t%{1}, %%{2}\\t\\n\"", op_add, 34 + count * 2, temp_reg));
-                writer.WriteLine(string.Format("        \"{0}\\t%%{1}, %{2}\\t\\n\"", op_mov, temp_reg, 1 + count));
+                writer.WriteLine(string.Format("        \"{0}\\t%{1}, %%{2}\\n\\t\"", op_mov, max_count + 1 + count * 2, temp_reg));
+                writer.WriteLine(string.Format("        \"{0}\\t%{1}, %%{2}\\n\\t\"", op_add, max_count + 2 + count * 2, temp_reg));
+                writer.WriteLine(string.Format("        \"{0}\\t%%{1}, %{2}\\n\\t\"", op_mov, temp_reg, 1 + count));
             }
             writer.WriteLine("        \"setc\\t%0\"");
             writer.WriteLine(string.Format("        : \"+r\"(c), {0}", string.Join(", ", Enumerable.Range(0, max_count).Select(n => string.Format("\"=g\"(zp[{0}])", n)))));
