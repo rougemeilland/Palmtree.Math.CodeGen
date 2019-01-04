@@ -73,11 +73,11 @@ namespace Palmtree.Math.CodeGen
 
         static void Generate(TextWriter writer)
         {
-            //writer.WriteLine("");
-            //GenerateADD_SET(writer, 32);
-            //writer.WriteLine("");
-            //GenerateADD_SET(writer, 16);
-            //writer.WriteLine("");
+            writer.WriteLine("");
+            GenerateADD_SET(writer, 32);
+            writer.WriteLine("");
+            GenerateADD_SET(writer, 16);
+            writer.WriteLine("");
             GenerateADD_SET(writer, 8);
             writer.WriteLine("");
         }
@@ -100,9 +100,9 @@ namespace Palmtree.Math.CodeGen
                 writer.WriteLine(string.Format("    {1}(c, xp[{0}], yp[{0}], &zp[{0}]);", count, op == "adc" ? "_ADD_UNIT" : "_ADDX_UNIT"));
             writer.WriteLine("#elif defined(__GNUC__)");
             writer.WriteLine("#ifdef _M_IX86");
-            GenerateASM_ADD(writer, max_count, op + "l", "movl", "ecx");
+            GenerateASM_ADD(writer, max_count, op, 32, "l", "ecx");
             writer.WriteLine("#elif defined(_M_IX64)");
-            GenerateASM_ADD(writer, max_count, op + "q", "movq", "rcx");
+            GenerateASM_ADD(writer, max_count, op, 64, "q", "rcx");
             writer.WriteLine("#else");
             writer.WriteLine("#error unknown platform");
             writer.WriteLine("#endif");
@@ -113,20 +113,20 @@ namespace Palmtree.Math.CodeGen
             writer.WriteLine("}");
         }
 
-        private static void GenerateASM_ADD(TextWriter writer, int max_count, string op_add, string op_mov, string temp_reg)
+        private static void GenerateASM_ADD(TextWriter writer, int max_count, string op_add, int bit_size, string suffix, string temp_reg)
         {
             writer.WriteLine("    __asm__ volatile (");
             writer.WriteLine("        \"addb\\t$-1, %0\\n\\t\"");
             for (int count = 0; count < max_count; ++count)
             {
-                writer.WriteLine(string.Format("        \"{0}\\t%{1}, %%{2}\\n\\t\"", op_mov, max_count + 1 + count * 2, temp_reg));
-                writer.WriteLine(string.Format("        \"{0}\\t%{1}, %%{2}\\n\\t\"", op_add, max_count + 2 + count * 2, temp_reg));
-                writer.WriteLine(string.Format("        \"{0}\\t%%{1}, %{2}\\n\\t\"", op_mov, temp_reg, 1 + count));
+                writer.WriteLine(string.Format("        \"{0}{1}\\t{2}(%{3}), %%{4}\\n\\t\"", "mov", suffix, count == 0 ? "" :  (bit_size / 8 * count).ToString(), "1", temp_reg));
+                writer.WriteLine(string.Format("        \"{0}{1}\\t{2}(%{3}), %%{4}\\n\\t\"", op_add, suffix, count == 0 ? "" : (bit_size / 8 * count).ToString(), "2", temp_reg));
+                writer.WriteLine(string.Format("        \"{0}{1}\\t%%{4}, {2}(%{3})\\n\\t\"", "mov", suffix, count == 0 ? "" : (bit_size / 8 * count).ToString(), "3", temp_reg));
             }
             writer.WriteLine("        \"setc\\t%0\"");
-            writer.WriteLine(string.Format("        : \"+r\"(c), {0}", string.Join(", ", Enumerable.Range(0, max_count).Select(n => string.Format("\"=g\"(zp[{0}])", n)))));
-            writer.WriteLine(string.Format("        : {0}", string.Join(", ", Enumerable.Range(0, max_count).Select(n => string.Format("\"g\"(xp[{0}]), \"rm\"(yp[{0}])", n)))));
-            writer.WriteLine(string.Format("        : \"cc\", \"%{0}\"", temp_reg));
+            writer.WriteLine("        : \"+r\"(c), \"+r\"(xp), \"+r\"(yp), \"+r\"(zp)");
+            writer.WriteLine("        :");
+            writer.WriteLine(string.Format("        : \"cc\", \"memory\", \"%{0}\"", temp_reg));
             writer.WriteLine(");");
         }
     }
