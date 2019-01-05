@@ -90,7 +90,7 @@ namespace Palmtree.Math.CodeGen
             writer.WriteLine("");
             GenerateADD(writer, "ADD", max_count, "adox", "_ADDX_UNIT");
             writer.WriteLine("");
-            GenerateADD(writer, "SUBTRUCT", max_count, "sbb", "_SUBTRACT_UNIT");
+            GenerateADD(writer, "SUBTRUCT", max_count, "sbb", "_SUBTRUCT_UNIT");
         }
 
         private static void GenerateADD(TextWriter writer, string title_func, int max_count, string op, string alt_func_name)
