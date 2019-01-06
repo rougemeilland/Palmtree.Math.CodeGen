@@ -74,32 +74,36 @@ namespace Palmtree.Math.CodeGen
         static void Generate(TextWriter writer)
         {
             writer.WriteLine("");
-            GenerateADD_SET(writer, 32);
+            GenerateFuncSet_ADD(writer, 32);
             writer.WriteLine("");
-            GenerateADD_SET(writer, 16);
+            GenerateFuncSet_ADD(writer, 16);
             writer.WriteLine("");
-            GenerateADD_SET(writer, 8);
+            GenerateFuncSet_ADD(writer, 8);
+            writer.WriteLine("");
+            GenerateFuncSet_ADD(writer, 4);
+            writer.WriteLine("");
+            GenerateFuncSet_ADD(writer, 2);
             writer.WriteLine("");
         }
 
-        private static void GenerateADD_SET(TextWriter writer, int max_count)
+        private static void GenerateFuncSet_ADD(TextWriter writer, int max_count)
         {
-            GenerateADD(writer, "ADD", max_count, "adc", "_ADD_UNIT");
+            GenerateFunc_ADD(writer, "ADD", max_count, "adc", "_ADD_UNIT");
             writer.WriteLine("");
-            GenerateADD(writer, "ADD", max_count, "adcx", "_ADDX_UNIT");
+            GenerateFunc_ADD(writer, "ADD", max_count, "adcx", "_ADDX_UNIT");
             writer.WriteLine("");
-            GenerateADD(writer, "ADD", max_count, "adox", "_ADDX_UNIT");
+            GenerateFunc_ADD(writer, "ADD", max_count, "adox", "_ADDX_UNIT");
             writer.WriteLine("");
-            GenerateADD(writer, "SUBTRUCT", max_count, "sbb", "_SUBTRUCT_UNIT");
+            GenerateFunc_ADD(writer, "SUBTRUCT", max_count, "sbb", "_SUBTRUCT_UNIT");
         }
 
-        private static void GenerateADD(TextWriter writer, string title_func, int max_count, string op, string alt_func_name)
+        private static void GenerateFunc_ADD(TextWriter writer, string title_func, int max_count, string op, string alt_func_name)
         {
             writer.WriteLine(string.Format("__inline static char _{0}_{1}WORDS_{2}(char c, __UNIT_TYPE* xp, __UNIT_TYPE* yp, __UNIT_TYPE* zp)", title_func, max_count, op.ToUpper()));
             writer.WriteLine("{");
             writer.WriteLine("#ifdef _MSC_VER");
             for (int count = 0; count < max_count; ++count)
-                writer.WriteLine(string.Format("    {1}(c, xp[{0}], yp[{0}], &zp[{0}]);", count, alt_func_name));
+                writer.WriteLine(string.Format("    c = {1}(c, xp[{0}], yp[{0}], &zp[{0}]);", count, alt_func_name));
             writer.WriteLine("#elif defined(__GNUC__)");
             writer.WriteLine("#ifdef _M_IX86");
             GenerateASM_ADD(writer, max_count, op, 32, "l", "ecx");
