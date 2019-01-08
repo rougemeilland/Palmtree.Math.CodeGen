@@ -88,18 +88,26 @@ namespace Palmtree.Math.CodeGen
 
         private static void GenerateFuncSet_ADD(TextWriter writer, int max_count)
         {
-            GenerateFunc_ADD(writer, "ADD", max_count, "adc", "_ADD_UNIT");
+            GenerateFunc_ADD(writer, "ADD", max_count, "adc", "", "__UNIT_TYPE", "_ADD_UNIT");
             writer.WriteLine("");
-            GenerateFunc_ADD(writer, "ADD", max_count, "adcx", "_ADDX_UNIT");
+            GenerateFunc_ADD(writer, "ADD", max_count, "adcx", "", "__UNIT_TYPE", "_ADDX_UNIT");
             writer.WriteLine("");
-            GenerateFunc_ADD(writer, "ADD", max_count, "adox", "_ADDX_UNIT");
+            GenerateFunc_ADD(writer, "ADD", max_count, "adox", "", "__UNIT_TYPE", "_ADDX_UNIT");
             writer.WriteLine("");
-            GenerateFunc_ADD(writer, "SUBTRUCT", max_count, "sbb", "_SUBTRUCT_UNIT");
+            GenerateFunc_ADD(writer, "SUBTRUCT", max_count, "sbb", "", "__UNIT_TYPE", "_SUBTRUCT_UNIT");
+            writer.WriteLine("");
+            GenerateFunc_ADD(writer, "ADD", max_count, "adc", "_DIV", "__UNIT_TYPE_DIV", "_ADD_UNIT_DIV");
+            writer.WriteLine("");
+            GenerateFunc_ADD(writer, "ADD", max_count, "adcx", "_DIV", "__UNIT_TYPE_DIV", "_ADDX_UNIT_DIV");
+            writer.WriteLine("");
+            GenerateFunc_ADD(writer, "ADD", max_count, "adox", "_DIV", "__UNIT_TYPE_DIV", "_ADDX_UNIT_DIV");
+            writer.WriteLine("");
+            GenerateFunc_ADD(writer, "SUBTRUCT", max_count, "sbb", "_DIV", "__UNIT_TYPE_DIV", "_SUBTRUCT_UNIT_DIV");
         }
 
-        private static void GenerateFunc_ADD(TextWriter writer, string title_func, int max_count, string op, string alt_func_name)
+        private static void GenerateFunc_ADD(TextWriter writer, string title_func, int max_count, string op, string suffix, string pointer_type, string alt_func_name)
         {
-            writer.WriteLine(string.Format("__inline static char _{0}_{1}WORDS_{2}(char c, __UNIT_TYPE* xp, __UNIT_TYPE* yp, __UNIT_TYPE* zp)", title_func, max_count, op.ToUpper()));
+            writer.WriteLine(string.Format("__inline static char _{0}_{1}WORDS_{2}{3}(char c, {4}* xp, {4}* yp, {4}* zp)", title_func, max_count, op.ToUpper(), suffix, pointer_type));
             writer.WriteLine("{");
             writer.WriteLine("#ifdef _MSC_VER");
             for (int count = 0; count < max_count; ++count)
